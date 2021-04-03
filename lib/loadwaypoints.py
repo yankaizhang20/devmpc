@@ -1,6 +1,7 @@
 import xlrd
 import json
 import numpy as np
+import math
 
 # 获取excel中的路点信息
 def GetRefTrack(path):
@@ -14,7 +15,8 @@ def GetRefTrack(path):
         col = np.matrix(collist)
         array[:, x] = col
     return array
-# 获取json中的路点信息
+    
+# 获取json中的路点信息,jsonpath中路点航向和前轮转角都为角度
 def GetJsonRefTrack(jsonpath):
     with open(jsonpath,'r') as f:
         data = json.load(f)
