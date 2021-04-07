@@ -28,7 +28,10 @@ timestemps=np.arange(0,55,T_control)
 # 直线200路点
 # waypoints=loadwaypoints.GetRefTrack("/home/zyk/mpc/resources/linewaypoint/line50.xlsx")
 # 直线1400路点
-waypoints=loadwaypoints.GetJsonRefTrack("/home/zyk/mpc/resources/line1400.json")
+# waypoints=loadwaypoints.GetJsonRefTrack("/home/zyk/mpc/resources/2021-4-6.json")
+#sin2000
+waypoints=loadwaypoints.GetRefTrack("/home/zyk/mpc/resources/linewaypoint/roads.xlsx")
+
 
 X=mpc.X(waypoints[0][0],waypoints[0][1],waypoints[0][2])
 Uk_1=mpc.U(0,0)
@@ -36,17 +39,21 @@ Ufk_1=mpc.U(0,0)
 index_nowref=0
 Np=40
 L=2.95
+index_lastref=1
 plt.ion()
 for t in timestemps:
        plt.plot(waypoints[:, 0], waypoints[:, 1])
        #根据当前状态和参考路点选择当前参考点及Np个参考点waypoints_nc
        distance = 10000
        (len_waypoints,b)=waypoints.shape
-       for i in range(index_nowref+1,len_waypoints):
+       for i in range(0,len_waypoints):
               if (waypoints[i, 0] - X.x)**2+(waypoints[i, 1] - X.y)**2 < distance:
                      distance = (waypoints[i, 0] - X.x)**2+(waypoints[i, 1] - X.y)**2
                      temp = i
        index_nowref=temp
+       log.write("index_lastref:{}".format(index_lastref))
+       if index_nowref<index_lastref:
+              index_nowref=index_lastref
        waypoints_nc=[]
        Uf_nc=[]
        for i in range(Np):
@@ -69,6 +76,7 @@ for t in timestemps:
        Uk_1=mpc.U(v,delta)
        Ukf_1=mpc.U(waypoints[index_nowref][3], waypoints[index_nowref][4])
        X.x,X.y,X.theata=carmodel.compute_next_state(X.x, X.y, X.theta, v, delta, T_control, L)
+       index_lastref=index_nowref
        print(X.x,X.y,X.theta,v,delta)
        plt.plot(X.x,X.y,color="black",marker=".")
        plt.show()

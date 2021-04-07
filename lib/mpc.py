@@ -97,12 +97,12 @@ def MPC(X, Xf, Uf, Uk_1, Ufk_1,Uf_nc, T,  Np, a_max, Umax, L):
               
        # 目标函数    J=Y^TQY+V^TRV+pe^2 
        # 权重矩阵Q
-       # d = 100 * (X.x - Xf.x) ** 2 + 100 * (X.y - Xf.y) ** 2+2
-       # dx = 0.5+100*(X.x - Xf.x)**2
-       # dy = 0.5+100*(X.y - X.y)**2
-       dx=1
-       dy=1
-       d=1
+       d = 100 * (X.x - Xf.x) ** 2 + 100 * (X.y - Xf.y) ** 2+2
+       dx = 0.5+100*(X.x - Xf.x)**2
+       dy = 0.5+100*(X.y - X.y)**2
+       # dx=1
+       # dy=1
+       # d=1
        Q=np.zeros((3*Np,3*Np))
        for i in range(Np):
               Q[i*3][i*3]=dx
@@ -111,13 +111,14 @@ def MPC(X, Xf, Uf, Uk_1, Ufk_1,Uf_nc, T,  Np, a_max, Umax, L):
        # 权重矩阵R
        R = np.zeros((2*Np, 2*Np))
        for i in range(0, 2*Np, 1):
-              R[i][i]=1
+              R[i][i]=0.5
        # 求目标函数的H系数矩阵
-       Rho=20
+       Rho=10
        temp=np.dot(np.dot(Theta.T,Q),Theta)
+       temp=temp+R
        temp=np.hstack((temp,np.zeros((2*Np,1))))
        row=np.hstack((np.zeros((1,2*Np)),np.array([[Rho]])))
-       H=np.vstack((temp,row))
+       H=np.vstack((temp,row))*2
        dX=np.array([
               [X.x-Xf.x],
               [X.y-Xf.y],
@@ -179,9 +180,9 @@ if __name__=='__main__':
        Uf=U(2,0)
        Uk_1=U(0,0)
        Ufk_1=U(0,0)
-       Uf_nc=[U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0),U(2,0)]
+       Uf_nc=[U(2,0),U(2,0),U(2,0),U(2,0)]
        T=0.02
-       Np=16
+       Np=4
        a_max=U(5,0.041)
        Umax=U(7,20)
        L=3
